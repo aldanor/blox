@@ -1,0 +1,7 @@
+*.sublime-*
+.tox/
+.cache/
+*.egg-info
+__pycache__
+*.py[cod]
+.coverage
