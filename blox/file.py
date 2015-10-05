@@ -29,6 +29,10 @@ class File(object):
     def writable(self):
         return self._mode == 'w'
 
+    @property
+    def filesize(self):
+        return os.stat(self._filename).st_size
+
     def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
         if not self.writable:
             raise ValueError('file is not writable')
