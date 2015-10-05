@@ -16,9 +16,10 @@ class File(object):
         elif mode not in 'rw':
             raise ValueError('invalid mode: {!r}; expected r/w'.format(mode))
         self._mode = mode
-        self._offsets = {}
         self._filename = filename
         self._handle = io.open(filename, mode + 'b')
+        self._index = {}
+        self._seek = 0
 
     @property
     def filename(self):
@@ -39,7 +40,11 @@ class File(object):
     def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
         if not self.writable:
             raise ValueError('file is not writable')
-        if name in self._offsets:
+        if name in self._index:
             raise ValueError('dataset {!r} already exists'.format(name))
-        self._offsets[name] = self._handle.tell()
-        write_blosc(data, self._handle, compression, level, shuffle)
+        self._index[name] = self._seek
+        self._handle.seek(self._seek)
+        self._seek = write_blosc(data, self._handle, compression, level, shuffle)
+        self._handle.truncate()
+        write_json(self._handle, self._index)
+        write_i64(self._handle, self._seek)
