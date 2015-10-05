@@ -16,9 +16,9 @@ class File(object):
         elif mode not in 'rw':
             raise ValueError('invalid mode: {!r}; expected r/w'.format(mode))
         self._mode = mode
-        self._filename = os.path.abspath(os.path.expanduser(filename))
-        self._handle = io.open(filename, mode)
         self._offsets = {}
+        self._filename = filename
+        self._handle = io.open(filename, mode + 'b')
 
     @property
     def filename(self):
