@@ -9,8 +9,11 @@ from blox.blosc import write_blosc
 
 
 class File(object):
-    def __init__(self, filename, mode='r'):
-        if mode not in 'rw':
+    def __init__(self, filename, mode=None):
+        filename = os.path.abspath(os.path.expanduser(filename))
+        if mode is None:
+            mode = 'r' if os.path.exists(filename) else 'w'
+        elif mode not in 'rw':
             raise ValueError('invalid mode: {!r}; expected r/w'.format(mode))
         self._mode = mode
         self._filename = os.path.abspath(os.path.expanduser(filename))
