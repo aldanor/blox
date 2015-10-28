@@ -20,10 +20,13 @@ class File(object):
         self._filename = filename
         self._handle = io.open(filename, mode + 'b')
         self._index = {}
-        if mode == 'r':
-            self._handle.seek(-8, os.SEEK_END)
-            self._handle.seek(read_i64(self._handle))
-            self._index = read_json(self._handle)
+        if not self.writable:
+            try:
+                self._handle.seek(-8, os.SEEK_END)
+                self._handle.seek(read_i64(self._handle))
+                self._index = read_json(self._handle)
+            except Exception as e:
+                raise IOError('cannot read file ({}: {})'.format(type(e).__name__, str(e)))
         self._seek = 0
 
     @property
