@@ -54,6 +54,12 @@ class File(object):
         write_i64(self._handle, self._seek)
         self._dirty = False
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     def close(self):
         if self._handle is not None:
             if self.writable:
