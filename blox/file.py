@@ -20,6 +20,7 @@ class File(object):
         self._filename = filename
         self._handle = io.open(filename, mode + 'b')
         self._index = {}
+        self._dirty = True
         if not self.writable:
             try:
                 self._handle.seek(-8, os.SEEK_END)
@@ -49,6 +50,16 @@ class File(object):
         self._handle.truncate()
         write_json(self._handle, self._index)
         write_i64(self._handle, self._seek)
+        self._dirty = False
+
+    def close(self):
+        if self._handle is not None:
+            if self.writable:
+                if self._dirty:
+                    self._write_index()
+                self._handle.flush()
+            self._handle.close()
+        self._handle = None
 
     def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
         if not self.writable:
@@ -57,5 +68,6 @@ class File(object):
             raise ValueError('dataset {!r} already exists'.format(name))
         self._index[name] = self._seek
         self._handle.seek(self._seek)
+        self._dirty = True
         self._seek = write_blosc(data, self._handle, compression, level, shuffle)
         self._write_index()
