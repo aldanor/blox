@@ -43,7 +43,7 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
-    def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
+    def write_array(self, name, data, compression='lz4', level=5, shuffle=True):
         self._check_handle(write=True)
         if name in self._index:
             raise ValueError('dataset {!r} already exists'.format(name))

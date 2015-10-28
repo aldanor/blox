@@ -14,6 +14,6 @@ class TestFile(object):
         raises_regexp(IOError, 'No such file', File, '/foo/bar/baz')
         assert File(tmpfile).filename == tmpfile
 
-    def test_create_dataset(self, tmpfile):
+    def test_write_array(self, tmpfile):
         raises_regexp(IOError, 'file is not writable',
-                      File(tmpfile).create_dataset, 'a', [])
+                      File(tmpfile).write_array, 'a', [])
