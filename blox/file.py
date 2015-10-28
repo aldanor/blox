@@ -79,7 +79,7 @@ class File(object):
         self._index[key] = [is_array, self._seek]
         self._handle.seek(self._seek)
         try:
-            self._seek = func(self._handle, data, *args, **kwargs)
+            self._seek += func(self._handle, data, *args, **kwargs)
             self._dirty = True
         except:
             self._index.pop(key)
