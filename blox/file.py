@@ -69,9 +69,14 @@ class File(object):
             self._handle.close()
         self._handle = None
 
+    def _check_handle(self, write=False):
+        if self._handle is None:
+            raise IOError('the file handle has been closed')
+        if write and not self.writable:
+            raise IOError('the file is not writable')
+
     def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
-        if not self.writable:
-            raise ValueError('file is not writable')
+        self._check_handle(write=True)
         if name in self._index:
             raise ValueError('dataset {!r} already exists'.format(name))
         self._index[name] = self._seek
