@@ -75,7 +75,7 @@ class File(object):
 
     def _write(self, key, data, is_array, func, *args, **kwargs):
         self._check_handle(write=True)
-        self._check_key(write=True)
+        self._check_key(key, write=True)
         self._index[key] = [is_array, self._seek]
         self._handle.seek(self._seek)
         try:
