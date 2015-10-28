@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import io
 import os
+import atexit
 
 from blox.utils import read_i64, write_i64, read_json, write_json
 from blox.blosc import write_blosc
@@ -21,6 +22,7 @@ class File(object):
         self._handle = io.open(filename, mode + 'b')
         self._index = {}
         self._dirty = True
+        atexit.register(self.close)
         if not self.writable:
             try:
                 self._handle.seek(-8, os.SEEK_END)
