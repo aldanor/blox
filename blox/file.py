@@ -42,6 +42,11 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
+    def _write_index(self):
+        self._handle.truncate()
+        write_json(self._handle, self._index)
+        write_i64(self._handle, self._seek)
+
     def create_dataset(self, name, data, compression='lz4', level=5, shuffle=True):
         if not self.writable:
             raise ValueError('file is not writable')
@@ -50,6 +55,4 @@ class File(object):
         self._index[name] = self._seek
         self._handle.seek(self._seek)
         self._seek = write_blosc(data, self._handle, compression, level, shuffle)
-        self._handle.truncate()
-        write_json(self._handle, self._index)
-        write_i64(self._handle, self._seek)
+        self._write_index()
