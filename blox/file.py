@@ -4,6 +4,8 @@ from __future__ import absolute_import
 
 import io
 import os
+import sys
+import six
 import atexit
 
 from blox.utils import read_i64, write_i64, read_json, write_json
@@ -43,15 +45,11 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
-    def write_array(self, name, data, compression='lz4', level=5, shuffle=True):
-        self._check_handle(write=True)
-        if name in self._index:
-            raise ValueError('dataset {!r} already exists'.format(name))
-        self._index[name] = self._seek
-        self._handle.seek(self._seek)
-        self._dirty = True
-        self._seek = write_blosc(data, self._handle, compression, level, shuffle)
-        self._write_index()
+    def write_json(self, key, data):
+        self._write(key, data, 0, write_json)
+
+    def write_array(self, key, data, compression='lz4', level=5, shuffle=True):
+        self._write(key, data, 1, write_blosc, compression, level, shuffle)
 
     def close(self):
         if self._handle is not None:
@@ -67,6 +65,20 @@ class File(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    def _write(self, key, data, is_array, func, *args, **kwargs):
+        self._check_handle(write=True)
+        self._check_name(write=True)
+        self._index[key] = [is_array, self._seek]
+        self._handle.seek(self._seek)
+        try:
+            self._seek = func(self._handle, data, *args, **kwargs)
+            self._dirty = True
+        except:
+            self._index.pop(key)
+            six.reraise(*sys.exc_info())
+        else:
+            self._write_index()
 
     def _read_index(self):
         try:
@@ -87,3 +99,9 @@ class File(object):
             raise IOError('the file handle has been closed')
         if write and not self.writable:
             raise IOError('the file is not writable')
+
+    def _check_key(self, key, write=False):
+        if not isinstance(key, six.string_types):
+            raise ValueError('invalid key: expected string, got {}'.format(type(key).__name__))
+        if write and key in self._index:
+            raise ValueError('key already exists: {!r}'.format(key))
