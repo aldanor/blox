@@ -5,11 +5,14 @@ from __future__ import absolute_import
 import ast
 import sys
 import struct
+import functools
 
 try:
     import ujson as json
+    json_dumps = json.dumps
 except ImportError:
     import json
+    json_dumps = functools.partial(json.dumps, separators=',:')
 
 PY3 = sys.version_info[0] == 3
 
@@ -38,7 +41,7 @@ def read_i64(stream, count=None):
 
 
 def write_json(stream, data):
-    payload = json.dumps(data).encode('utf-8')
+    payload = json_dumps(data).encode('utf-8')
     write_i64(stream, len(payload))
     stream.write(payload)
     return len(payload) + 8
