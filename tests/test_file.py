@@ -15,5 +15,5 @@ class TestFile(object):
         assert File(tmpfile).filename == tmpfile
 
     def test_create_dataset(self, tmpfile):
-        raises_regexp(ValueError, 'file is not writable',
+        raises_regexp(IOError, 'file is not writable',
                       File(tmpfile).create_dataset, 'a', [])
