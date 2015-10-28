@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from blox.file import File
 from pytest import raises_regexp
+
+from blox.file import File
 
 
 class TestFile(object):
