@@ -45,6 +45,9 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
+    def __iter__(self):
+        return iter(sorted(self._index))
+
     def read(self, key):
         self._check_handle()
         self._check_key(key)
