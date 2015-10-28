@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import ast
-import sys
 import struct
 import functools
 
@@ -13,13 +12,6 @@ try:
 except ImportError:
     import json
     json_dumps = functools.partial(json.dumps, separators=',:')
-
-PY3 = sys.version_info[0] == 3
-
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
 
 
 def flatten_dtype(dtype):

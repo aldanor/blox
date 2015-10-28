@@ -2,14 +2,15 @@
 
 from __future__ import absolute_import
 
+import six
 import blosc
 import numpy as np
 
-from blox.utils import read_json, write_json, flatten_dtype, string_types
+from blox.utils import read_json, write_json, flatten_dtype
 
 
-def write_blosc(data, stream, compression='lz4', level=5, shuffle=True):
-    if isinstance(compression, string_types) and compression.startswith('blosc:'):
+def write_blosc(stream, data, compression='lz4', level=5, shuffle=True):
+    if isinstance(compression, six.string_types) and compression.startswith('blosc:'):
         compression = compression[6:]
     data = np.asanyarray(data)
     if not data.flags.contiguous:

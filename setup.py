@@ -34,7 +34,7 @@ setup(
         'Programming Language :: Python :: 3.5',
     ),
     install_requires=[
-        'numpy', 'blosc'
+        'numpy', 'blosc', 'six'
     ],
     extras_require={
         'extras': ['ujson']
