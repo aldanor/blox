@@ -9,7 +9,7 @@ import six
 import atexit
 
 from blox.utils import read_i64, write_i64, read_json, write_json
-from blox.blosc import write_blosc
+from blox.blosc import read_blosc, write_blosc
 
 
 class File(object):
@@ -44,6 +44,15 @@ class File(object):
     @property
     def filesize(self):
         return os.stat(self._filename).st_size
+
+    def read(self, name):
+        self._check_handle()
+        self._check_name(name)
+        if name not in self._index:
+            raise ValueError('dataset {!r} not found'.format(name))
+        is_array, offset = self._index[name]
+        self._handle.seek(offset)
+        return (read_blosc if is_array else read_json)(self._handle)
 
     def write_json(self, key, data):
         self._write(key, data, 0, write_json)
