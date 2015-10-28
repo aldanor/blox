@@ -25,7 +25,7 @@ from blox.utils import read_json
 @pytest.mark.parametrize('shuffle', [0, 1, 2], ids=['no', 'byte', 'bit'])
 def test_roundtrip(arr, compression, shuffle):
     stream = io.BytesIO()
-    length = write_blosc(arr, stream, compression, 5, shuffle)
+    length = write_blosc(stream, arr, compression, 5, shuffle)
     arr = np.asanyarray(arr)
     assert stream.tell() == length
     stream.seek(0)
@@ -45,4 +45,4 @@ def test_roundtrip(arr, compression, shuffle):
 def test_invalid_args():
     stream = io.BytesIO()
     raises_regexp(ValueError, 'expected contiguous array',
-                  write_blosc, np.ndarray((3, 4, 5), order='F').transpose(0, 2, 1), stream)
+                  write_blosc, stream, np.ndarray((3, 4, 5), order='F').transpose(0, 2, 1))
