@@ -45,12 +45,10 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
-    def read(self, name):
+    def read(self, key):
         self._check_handle()
-        self._check_name(name)
-        if name not in self._index:
-            raise ValueError('dataset {!r} not found'.format(name))
-        is_array, offset = self._index[name]
+        self._check_key(key)
+        is_array, offset = self._index[key]
         self._handle.seek(offset)
         return (read_blosc if is_array else read_json)(self._handle)
 
@@ -77,7 +75,7 @@ class File(object):
 
     def _write(self, key, data, is_array, func, *args, **kwargs):
         self._check_handle(write=True)
-        self._check_name(write=True)
+        self._check_key(write=True)
         self._index[key] = [is_array, self._seek]
         self._handle.seek(self._seek)
         try:
