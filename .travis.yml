@@ -1,23 +1,13 @@
 sudo: false
 language: python
-python: 2.7
+python:
+- '2.7'
+- '3.4'
+- '3.5'
 env:
-  matrix:
-  - TOXENV=py27-json
-  - TOXENV=py34-json
-  - TOXENV=py35-json
-  - TOXENV=py27-ujson
-  - TOXENV=py34-ujson
-  - TOXENV=py35-ujson
-addons:
-  apt:
-    packages:
-    - python
-    - python-dev
-    - python-virtualenv
-install:
-- pip install tox
-script:
-- tox
+- TOXENV=py-json
+- TOXENV=py-ujson
+install: pip install tox
+script: tox -e $TOXENV
 notifications:
   email: false
