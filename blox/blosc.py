@@ -41,15 +41,14 @@ def read_blosc(stream, out=None):
     dtype = np.dtype(meta['dtype'])
     if out is None:
         out = np.empty(shape, dtype)
-    else:
-        if not isinstance(out, np.ndarray):
-            raise TypeError('expected ndarray, got {}'.format(type(out).__name__))
-        if out.shape != shape:
-            raise ValueError('incompatible shape: expected {}, got {}'.format(shape, out.shape))
-        if out.dtype != dtype:
-            raise ValueError('incompatible dtype: expected {}, got {}'.format(dtype, out.dtype))
-        if not out.flags.contiguous:
-            raise ValueError('expected contiguous array')
+    elif not isinstance(out, np.ndarray):
+        raise TypeError('expected ndarray, got {}'.format(type(out).__name__))
+    elif out.shape != shape:
+        raise ValueError('incompatible shape: expected {}, got {}'.format(shape, out.shape))
+    elif out.dtype != dtype:
+        raise ValueError('incompatible dtype: expected {}, got {}'.format(dtype, out.dtype))
+    elif not out.flags.contiguous:
+        raise ValueError('expected contiguous array')
     blosc.decompress_ptr(
         stream.read(meta['length']),
         out.__array_interface__['data'][0]
