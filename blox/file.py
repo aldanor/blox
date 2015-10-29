@@ -160,5 +160,8 @@ class File(object):
     def _check_key(self, key, write=False):
         if not isinstance(key, six.string_types):
             raise ValueError('invalid key: expected string, got {}'.format(type(key).__name__))
-        if write and key in self._index:
-            raise ValueError('key already exists: {!r}'.format(key))
+        if write:
+            if not key:
+                raise ValueError('invalid key: empty string')
+            if key in self._index:
+                raise ValueError('key already exists: {!r}'.format(key))
