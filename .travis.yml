@@ -3,9 +3,12 @@ language: python
 python: 2.7
 env:
   matrix:
-  - TOXENV=py27
-  - TOXENV=py34
-  - TOXENV=py35
+  - TOXENV=py27-json
+  - TOXENV=py34-json
+  - TOXENV=py35-json
+  - TOXENV=py27-ujson
+  - TOXENV=py34-ujson
+  - TOXENV=py35-ujson
 addons:
   apt:
     packages:
