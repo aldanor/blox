@@ -37,7 +37,7 @@ def write_blosc(stream, data, compression='lz4', level=5, shuffle=True):
 
 def read_blosc(stream, out=None):
     meta = read_json(stream)
-    shape = meta['shape']
+    shape = tuple(meta['shape'])
     dtype = np.dtype(meta['dtype'])
     if out is None:
         out = np.empty(shape, dtype)
