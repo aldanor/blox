@@ -12,6 +12,30 @@ from blox.utils import read_i64, write_i64, read_json, write_json
 from blox.blosc import read_blosc, write_blosc
 
 
+"""The following signature is a direct descendent of PNG and HDF5 file signatures:
+
+- byte 1: non-ASCII value to reduce the probability that a text file may be
+  misrecognized as a blox file; also, it catches bad file transfers that clear bit 7;
+- bytes 2-4: format name;
+- bytes 5-6: CR-LF sequence catches bad file transfers that alter newline sequences;
+- byte 7: control-Z character stops file display under MS-DOS;
+- byte 8: the final line feed checks for the inverse of the CR-LF translation problem.
+"""
+FORMAT_STRING = b'\211BLX\r\n\032\n'
+
+"""Format version is stored as a little-endian integer in the 8 bytes following the initial
+signature, and should only be increased if backwards-incompatible changes are introduced."""
+FORMAT_VERSION = 1
+
+
+def is_blox(filename):
+    try:
+        with open(os.path.abspath(os.path.expanduser(str(filename))), 'rb') as fd:
+            return File._try_read_and_verify_version(fd) is not None
+    except:
+        return False
+
+
 class File(object):
     def __init__(self, filename, mode=None):
         filename = os.path.abspath(os.path.expanduser(filename))
@@ -24,10 +48,18 @@ class File(object):
         self._handle = io.open(filename, mode + 'b')
         self._index = {}
         self._dirty = True
+        self._seek = 0
+        self._version = FORMAT_VERSION
         atexit.register(self.close)
         if not self.writable:
+            self._version = self._try_read_and_verify_version(self._handle)
             self._read_index()
-        self._seek = 0
+        else:
+            self._write_signature()
+
+    @property
+    def version(self):
+        return self._version
 
     @property
     def filename(self):
@@ -75,6 +107,21 @@ class File(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    @classmethod
+    def _try_read_and_verify_version(cls, byte_stream):
+        if byte_stream.read(8) != FORMAT_STRING:
+            raise IOError('unrecognized file format')
+        version = read_i64(byte_stream)
+        if version != FORMAT_VERSION:  # this could be later relaxed to a range of versions
+            raise IOError('incompatible version: {} (expected {})'.format(version, FORMAT_VERSION))
+        return version
+
+    def _write_signature(self):
+        self._handle.seek(0)
+        self._handle.write(FORMAT_STRING)
+        write_i64(self._handle, FORMAT_VERSION)
+        self._seek = 16
 
     def _write(self, key, data, is_array, func, *args, **kwargs):
         self._check_handle(write=True)

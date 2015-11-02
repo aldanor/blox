@@ -10,3 +10,7 @@ __pycache__
 .coverage*
 *.blx
 htmlcov/
+.conda/
+.junit/
+_tox.ini
+*.todo
