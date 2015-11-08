@@ -38,6 +38,7 @@ def is_blox(filename):
 
 class File(object):
     def __init__(self, filename, mode=None):
+        filename = getattr(filename, 'strpath', filename)
         filename = os.path.abspath(os.path.expanduser(filename))
         if mode is None:
             mode = 'r' if os.path.exists(filename) else 'w'

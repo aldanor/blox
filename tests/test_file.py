@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import io
+import py.path
 from pytest import raises_regexp
 
 from blox.file import File, is_blox, FORMAT_STRING, FORMAT_VERSION
@@ -29,6 +30,9 @@ class TestFile(object):
         assert f1.mode == 'r' and not f1.writable
         f2 = File(tmpfile, 'w')
         assert f2.mode == 'w' and f2.writable
+
+    def test_py_path_local(self, tmpfile):
+        assert File(py.path.local(tmpfile)).filename == tmpfile
 
     def test_filename(self, tmpfile):
         raises_regexp(IOError, 'No such file', File, '/foo/bar/baz')
