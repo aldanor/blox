@@ -126,6 +126,11 @@ class TestFile(object):
         f = File(tmpfile)
         f.close()
         f.close()
+        with File(tmpfile) as f:
+            assert f._handle is not None
+        assert f._handle is None
+        pytest.raises_regexp(IOError, 'the file handle has been closed',
+                             f.read, 'foo')
 
     def test_flush_on_open(self, tmpfile):
         with File(tmpfile + '.2', 'w'):
