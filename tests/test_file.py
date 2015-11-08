@@ -146,3 +146,11 @@ class TestFile(object):
             write_i64(f, 0)
         pytest.raises_regexp(IOError, r'incompatible version: 0 \(expected {}\)'
                              .format(FORMAT_VERSION), File, tmpfile)
+
+    def test_corrupt_index(self, tmpfile):
+        with io.open(tmpfile, 'wb') as f:
+            f.write(FORMAT_STRING)
+            write_i64(f, FORMAT_VERSION)
+            f.write(b'foo')
+        pytest.raises_regexp(IOError, 'unable to read index',
+                             File, tmpfile)

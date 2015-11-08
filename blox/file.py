@@ -145,8 +145,8 @@ class File(object):
             self._handle.seek(-8, os.SEEK_END)
             self._handle.seek(read_i64(self._handle))
             self._index = read_json(self._handle)
-        except Exception as e:
-            raise IOError('cannot read file ({}: {})'.format(type(e).__name__, str(e)))
+        except:
+            raise IOError('unable to read index')
 
     def _write_index(self):
         self._handle.truncate()
