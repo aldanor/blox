@@ -5,19 +5,22 @@ import pytest
 import numpy as np
 from io import BytesIO
 
-from blox.utils import flatten_dtype, read_i64, write_i64, read_json, write_json
+from blox.utils import flatten_dtype, restore_dtype, read_i64, write_i64, read_json, write_json
 
 
-@pytest.mark.parametrize('dtype, expected', [
+@pytest.mark.parametrize('dtype, flattened', [
     ('f8', 'float64'),
     ('i8', 'int64'),
     ([('a', '<f4'), ('b', [('c', '<i4'), ('d', '<i2')])],
-     [('a', '<f4'), ('b', [('c', '<i4'), ('d', '<i2')])])
+     [('a', '<f4'), ('b', [('c', '<i4'), ('d', '<i2')])],),
+    ((np.record, [('a', '<f4'), ('b', [('c', '<i4'), ('d', '<i2')])]),
+     ('record', [('a', '<f4'), ('b', [('c', '<i4'), ('d', '<i2')])]))
 ])
-def test_flatten_dtype(dtype, expected):
+def test_flatten_restore_dtype(dtype, flattened):
     dtype = np.dtype(dtype)
-    assert flatten_dtype(dtype) == expected
-    assert np.dtype(flatten_dtype(dtype)) == dtype
+    assert flatten_dtype(dtype) == flattened
+    assert restore_dtype(flatten_dtype(dtype)) == dtype
+    assert restore_dtype(json.loads(json.dumps(flatten_dtype(dtype)))) == dtype
 
 
 def test_read_write_i64():

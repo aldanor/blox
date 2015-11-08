@@ -6,7 +6,7 @@ import six
 import blosc
 import numpy as np
 
-from blox.utils import read_json, write_json, flatten_dtype
+from blox.utils import read_json, write_json, flatten_dtype, restore_dtype
 
 
 def write_blosc(stream, data, compression='lz4', level=5, shuffle=True):
@@ -38,7 +38,7 @@ def write_blosc(stream, data, compression='lz4', level=5, shuffle=True):
 def read_blosc(stream, out=None):
     meta = read_json(stream)
     shape = tuple(meta['shape'])
-    dtype = np.dtype(meta['dtype'])
+    dtype = restore_dtype(meta['dtype'])
     if out is None:
         out = np.empty(shape, dtype)
     elif not isinstance(out, np.ndarray):
@@ -53,4 +53,6 @@ def read_blosc(stream, out=None):
         stream.read(meta['length']),
         out.__array_interface__['data'][0]
     )
+    if out.dtype.type is np.record:
+        out = out.view(np.recarray)
     return out

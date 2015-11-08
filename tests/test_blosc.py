@@ -79,6 +79,17 @@ class TestBlosc(object):
         assert out.dtype == array.dtype
         np.testing.assert_array_equal(out, array)
 
+    def test_recarray(self):
+        arr = np.rec.fromarrays(np.arange(6).reshape(2, 3), names='x, y').view(np.recarray)
+        assert arr.dtype.type is np.record
+        stream = io.BytesIO()
+        write_blosc(stream, arr)
+        stream.seek(0)
+        out = read_blosc(stream)
+        assert isinstance(out, np.recarray)
+        assert out.dtype == arr.dtype
+        assert out.dtype.type is np.record
+
     def test_noncontiguous(self):
         stream = io.BytesIO()
         raises_regexp(ValueError, 'expected contiguous array',

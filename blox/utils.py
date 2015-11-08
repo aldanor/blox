@@ -2,9 +2,10 @@
 
 from __future__ import absolute_import
 
-import ast
+import six
 import struct
 import functools
+import numpy as np
 
 try:
     import ujson as json
@@ -15,10 +16,32 @@ except ImportError:
 
 
 def flatten_dtype(dtype):
-    dtype = str(dtype)
-    if dtype.startswith(('{', '[')):
-        return ast.literal_eval(dtype)
-    return dtype
+    dtype = np.dtype(dtype)
+    if dtype.fields is not None:
+        if dtype.type is np.record:
+            return ('record', list(dtype.descr))
+        return list(dtype.descr)
+    return str(dtype)
+
+
+def restore_dtype(dtype):
+    def _convert_dtype(dt):
+        # workaround for a long-standing bug in numpy:
+        # https://github.com/numpy/numpy/issues/2407
+        is_string = lambda s: isinstance(s, (six.text_type, six.string_types))
+        if isinstance(dt, list):
+            if len(dt) == 2 and is_string(dt[0]):
+                return _convert_dtype(tuple(dt))
+            return [_convert_dtype(subdt) for subdt in dt]
+        elif isinstance(dt, tuple):
+            return tuple(_convert_dtype(subdt) for subdt in dt)
+        elif isinstance(dt, six.text_type) and six.PY2:
+            return dt.encode('ascii')
+        return dt
+    dtype = _convert_dtype(dtype)
+    if isinstance(dtype, (list, tuple)) and len(dtype) == 2 and dtype[0] == 'record':
+        return np.dtype((np.record, np.dtype(dtype[1])))
+    return np.dtype(dtype)
 
 
 def write_i64(stream, *values):
