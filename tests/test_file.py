@@ -2,6 +2,7 @@
 
 import io
 import os
+import pytest
 import py.path
 import numpy as np
 from pytest import raises_regexp
@@ -84,3 +85,13 @@ class TestFile(object):
                 assert f.read(key) == data
             else:
                 np.testing.assert_array_equal(f.read(key), data)
+
+    def test_invalid_key(self, tmpfile):
+        f = File(tmpfile, 'w')
+        pytest.raises_regexp(ValueError, 'invalid key: expected string',
+                             f.write_json, 42, 0)
+        pytest.raises_regexp(ValueError, 'invalid key: empty string',
+                             f.write_json, '', 0)
+        f.write_json('foo', 'bar')
+        pytest.raises_regexp(ValueError, "key already exists: 'foo'",
+                             f.write_json, 'foo', 'baz')
