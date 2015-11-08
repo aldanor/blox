@@ -47,7 +47,6 @@ class File(object):
         self._filename = filename
         self._handle = io.open(filename, mode + 'b')
         self._index = {}
-        self._dirty = True
         self._seek = 0
         self._version = FORMAT_VERSION
         atexit.register(self.close)
@@ -56,6 +55,7 @@ class File(object):
             self._read_index()
         else:
             self._write_signature()
+            self._write_index()
 
     @property
     def version(self):
@@ -96,8 +96,6 @@ class File(object):
     def close(self):
         if self._handle is not None:
             if self.writable:
-                if self._dirty:
-                    self._write_index()
                 self._handle.flush()
             self._handle.close()
         self._handle = None
@@ -130,9 +128,9 @@ class File(object):
         self._handle.seek(self._seek)
         try:
             self._seek += func(self._handle, data, *args, **kwargs)
-            self._dirty = True
         except:
             self._index.pop(key)
+            self._write_index()
             six.reraise(*sys.exc_info())
         else:
             self._write_index()
@@ -149,7 +147,6 @@ class File(object):
         self._handle.truncate()
         write_json(self._handle, self._index)
         write_i64(self._handle, self._seek)
-        self._dirty = False
 
     def _check_handle(self, write=False):
         if self._handle is None:
