@@ -13,6 +13,8 @@ def write_blosc(stream, data, compression='lz4', level=5, shuffle=True):
     if isinstance(compression, six.string_types) and compression.startswith('blosc:'):
         compression = compression[6:]
     data = np.asanyarray(data)
+    if data.dtype == np.dtype('O'):
+        raise ValueError('unable to serialize: invalid dtype')
     if not data.flags.contiguous:
         raise ValueError('expected contiguous array')
     payload = blosc.compress_ptr(

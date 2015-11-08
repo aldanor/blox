@@ -55,6 +55,13 @@ class TestBlosc(object):
     def test_length(self, stream, length):
         assert stream.tell() == length
 
+    def test_invalid_dtype(self):
+        stream = io.BytesIO()
+        pytest.raises_regexp(ValueError, 'unable to serialize: invalid dtype',
+                             write_blosc, stream, {})
+        pytest.raises_regexp(ValueError, 'unable to serialize: invalid dtype',
+                             write_blosc, stream, object)
+
     def test_metadata(self, array, compression, shuffle, stream, length):
         array = np.asanyarray(array)
         stream.seek(0)
