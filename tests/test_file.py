@@ -45,3 +45,14 @@ class TestFile(object):
     def test_write_array(self, tmpfile):
         raises_regexp(IOError, 'file is not writable',
                       File(tmpfile).write_array, 'a', [])
+
+    def test_iter(self, tmpfile):
+        f = File(tmpfile, 'w')
+        f.write_array('c', 10)
+        f.write_array('a', [1, 2, 3])
+        f.write_json('b', {'foo': 'bar'})
+        f.write_json('d', 42)
+        assert list(f) == ['a', 'b', 'c', 'd']
+        f.close()
+        f = File(tmpfile)
+        assert list(f) == ['a', 'b', 'c', 'd']
