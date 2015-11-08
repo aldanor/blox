@@ -23,14 +23,20 @@ def test_is_blox(tmpfile):
 
 
 class TestFile(object):
-    def test_mode(self, tmpfile):
+    def test_mode_writable(self, tmpfile):
         raises_regexp(ValueError, 'invalid mode', File, tmpfile, 'foo')
-        assert File(tmpfile).mode == 'r'
-        assert File(tmpfile, 'w').mode == 'w'
+        f1 = File(tmpfile)
+        assert f1.mode == 'r' and not f1.writable
+        f2 = File(tmpfile, 'w')
+        assert f2.mode == 'w' and f2.writable
 
     def test_filename(self, tmpfile):
         raises_regexp(IOError, 'No such file', File, '/foo/bar/baz')
         assert File(tmpfile).filename == tmpfile
+
+    def test_format_version(self, tmpfile):
+        assert File(tmpfile).format_version == FORMAT_VERSION
+        assert File(tmpfile + '.2', mode='w').format_version == FORMAT_VERSION
 
     def test_write_array(self, tmpfile):
         raises_regexp(IOError, 'file is not writable',
