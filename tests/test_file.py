@@ -3,6 +3,7 @@
 import io
 import os
 import py.path
+import numpy as np
 from pytest import raises_regexp
 
 from blox.file import File, is_blox, FORMAT_STRING, FORMAT_VERSION
@@ -60,3 +61,26 @@ class TestFile(object):
 
     def test_filesize(self, tmpfile):
         assert os.stat(tmpfile).st_size == File(tmpfile).filesize
+
+    def test_read_write(self, tmpfile):
+        entries = [
+            ('a', 'json', {'a': 'b'}),
+            ('b', 'array', np.array([1, 2, 3], 'float32')),
+            ('c', 'json', 42),
+            ('d', 'array', np.rec.fromarrays([[1, 2], [3, 4]], names='x, y')),
+            ('e', 'array', ['foo', 'bar'])
+        ]
+        index = {'a': 0, 'b': 1, 'c': 0, 'd': 1, 'e': 1}
+        with File(tmpfile, 'w') as f:
+            for key, tp, data in entries:
+                getattr(f, 'write_' + tp)(key, data)
+            assert ''.join(f) == 'abcde'
+            assert {k: v[0] for k, v in f._index.items()} == index
+        f = File(tmpfile)
+        assert ''.join(f) == 'abcde'
+        assert {k: v[0] for k, v in f._index.items()} == index
+        for key, tp, data in entries:
+            if tp == 'json':
+                assert f.read(key) == data
+            else:
+                np.testing.assert_array_equal(f.read(key), data)
