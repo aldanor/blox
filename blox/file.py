@@ -57,6 +57,7 @@ class File(object):
         else:
             self._write_signature()
             self._write_index()
+            self._handle.flush()
 
     @property
     def format_version(self):

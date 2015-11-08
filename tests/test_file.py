@@ -117,3 +117,7 @@ class TestFile(object):
         f = File(tmpfile)
         f.close()
         f.close()
+
+    def test_flush_on_open(self, tmpfile):
+        with File(tmpfile + '.2', 'w'):
+            assert File(tmpfile + '.2').filename == tmpfile + '.2'
