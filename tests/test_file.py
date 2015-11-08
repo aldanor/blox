@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import io
+import os
 import py.path
 from pytest import raises_regexp
 
@@ -56,3 +57,6 @@ class TestFile(object):
         f.close()
         f = File(tmpfile)
         assert list(f) == ['a', 'b', 'c', 'd']
+
+    def test_filesize(self, tmpfile):
+        assert os.stat(tmpfile).st_size == File(tmpfile).filesize
