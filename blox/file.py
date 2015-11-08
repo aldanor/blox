@@ -58,7 +58,7 @@ class File(object):
             self._write_index()
 
     @property
-    def version(self):
+    def format_version(self):
         return self._version
 
     @property
