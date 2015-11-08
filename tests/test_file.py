@@ -154,3 +154,12 @@ class TestFile(object):
             f.write(b'foo')
         pytest.raises_regexp(IOError, 'unable to read index',
                              File, tmpfile)
+
+    def test_fail_on_write(self, tmpfile):
+        with File(tmpfile, 'w') as f:
+            f.write_json('a', 42)
+            pytest.raises_regexp(ValueError, 'unable to serialize: invalid dtype',
+                                 f.write_array, 'b', {})
+        with File(tmpfile) as f:
+            assert list(f) == ['a']
+            assert f.read('a') == 42
