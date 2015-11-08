@@ -101,3 +101,19 @@ class TestFile(object):
                              f.read, 42)
         pytest.raises_regexp(KeyError, 'bar',
                              f.read, 'bar')
+
+    def test_close_handle(self, tmpfile):
+        f = File(tmpfile, 'w')
+        f.close()
+        pytest.raises_regexp(IOError, 'the file handle has been closed',
+                             f.read, 'foo')
+        pytest.raises_regexp(IOError, 'the file handle has been closed',
+                             f.write_array, 'foo', [1, 2])
+        pytest.raises_regexp(IOError, 'the file handle has been closed',
+                             f.write_json, 'foo', [1, 2])
+        f.close()
+        assert f.filename == tmpfile
+        assert f.writable
+        f = File(tmpfile)
+        f.close()
+        f.close()
