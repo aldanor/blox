@@ -168,3 +168,17 @@ class TestFile(object):
         with File(tmpfile) as f:
             assert list(f) == ['a']
             assert f.read('a') == 42
+
+    def test_read_into(self, tmpfile):
+        arr = np.arange(6).reshape(2, 3)
+        with File(tmpfile, 'w') as f:
+            f.write_json('a', 42)
+            f.write_array('b', arr)
+        with File(tmpfile) as f:
+            pytest.raises_regexp(ValueError, 'can only specify output for array values',
+                                 f.read, 'a', out='foo')
+            pytest.raises_regexp(TypeError, 'expected ndarray',
+                                 f.read, 'b', out='foo')
+            out = np.empty_like(arr)
+            assert f.read('b', out=out) is out
+            np.testing.assert_array_equal(out, arr)

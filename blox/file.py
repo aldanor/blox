@@ -82,12 +82,17 @@ class File(object):
     def __iter__(self):
         return iter(sorted(self._index))
 
-    def read(self, key):
+    def read(self, key, out=None):
         self._check_handle()
         self._check_key(key)
         is_array, offset = self._index[key]
+        if not is_array and out is not None:
+            raise ValueError('can only specify output for array values')
         self._handle.seek(offset)
-        return (read_blosc if is_array else read_json)(self._handle)
+        if is_array:
+            return read_blosc(self._handle, out=out)
+        else:
+            return read_json(self._handle)
 
     def write_json(self, key, data):
         self._write(key, data, 0, write_json)
