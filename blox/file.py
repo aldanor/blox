@@ -112,7 +112,10 @@ class File(object):
     def _try_read_and_verify_version(cls, byte_stream):
         if byte_stream.read(8) != FORMAT_STRING:
             raise IOError('unrecognized file format')
-        version = read_i64(byte_stream)
+        try:
+            version = read_i64(byte_stream)
+        except:
+            raise IOError('unable to read file version')
         if version != FORMAT_VERSION:  # this could be later relaxed to a range of versions
             raise IOError('incompatible version: {} (expected {})'.format(version, FORMAT_VERSION))
         return version

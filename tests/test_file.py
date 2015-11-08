@@ -130,3 +130,19 @@ class TestFile(object):
     def test_flush_on_open(self, tmpfile):
         with File(tmpfile + '.2', 'w'):
             assert File(tmpfile + '.2').filename == tmpfile + '.2'
+
+    def test_format_signature(self, tmpfile):
+        with io.open(tmpfile, 'wb') as f:
+            f.write(b'foo')
+        pytest.raises_regexp(IOError, 'unrecognized file format',
+                             File, tmpfile)
+        with open(tmpfile, 'wb') as f:
+            f.write(FORMAT_STRING)
+            f.write(b'foo')
+        pytest.raises_regexp(IOError, 'unable to read file version',
+                             File, tmpfile)
+        with open(tmpfile, 'wb') as f:
+            f.write(FORMAT_STRING)
+            write_i64(f, 0)
+        pytest.raises_regexp(IOError, r'incompatible version: 0 \(expected {}\)'
+                             .format(FORMAT_VERSION), File, tmpfile)
