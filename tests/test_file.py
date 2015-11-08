@@ -95,3 +95,9 @@ class TestFile(object):
         f.write_json('foo', 'bar')
         pytest.raises_regexp(ValueError, "key already exists: 'foo'",
                              f.write_json, 'foo', 'baz')
+        f.close()
+        f = File(tmpfile)
+        pytest.raises_regexp(ValueError, 'invalid key: expected string',
+                             f.read, 42)
+        pytest.raises_regexp(KeyError, 'bar',
+                             f.read, 'bar')
