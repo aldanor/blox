@@ -2,6 +2,7 @@
 
 import io
 import os
+import blosc
 import pytest
 import py.path
 import numpy as np
@@ -63,7 +64,15 @@ class TestFile(object):
     def test_filesize(self, tmpfile):
         assert os.stat(tmpfile).st_size == File(tmpfile).filesize
 
-    def test_read_write(self, tmpfile):
+    @pytest.mark.parametrize(
+        'num, comp', list(enumerate(blosc.compressor_list())) + [(None, None)]
+    )
+    def test_read_write(self, tmpfile, num, comp):
+        options = {}
+        if comp is not None:
+            options['compression'] = comp
+            options['level'] = 1 + num * 2
+            options['shuffle'] = num % 2
         entries = [
             ('a', 'json', {'a': 'b'}),
             ('b', 'array', np.array([1, 2, 3], 'float32')),
