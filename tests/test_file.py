@@ -216,3 +216,11 @@ class TestFile(object):
             assert 'a' in f and 'b' not in f
         with File(tmpfile) as f:
             assert 'a' in f and 'b' not in f
+
+    def test_len(self, tmpfile):
+        with File(tmpfile, 'w') as f:
+            f.write_json('a', 'b')
+            f.write_array('b', [1, 2])
+            assert len(f) == 2
+        with File(tmpfile) as f:
+            assert len(f) == 2

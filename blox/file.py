@@ -111,6 +111,9 @@ class File(object):
     def __contains__(self, key):
         return key in self._index
 
+    def __len__(self):
+        return len(self._index)
+
     def read(self, key, out=None):
         self._check_handle()
         self._check_key(key)
