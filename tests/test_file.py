@@ -33,7 +33,11 @@ class TestFile(object):
         f1 = File(tmpfile)
         assert f1.mode == 'r' and not f1.writable
         f2 = File(tmpfile, 'w')
-        assert f2.mode == 'w' and f2.writable
+        assert f2.mode == 'r+' and f2.writable
+        f3 = File(tmpfile, 'r')
+        assert f3.mode == 'r' and not f3.writable
+        f4 = File(tmpfile, 'r+')
+        assert f4.mode == 'r+' and f4.writable
 
     def test_py_path_local(self, tmpfile):
         assert File(py.path.local(tmpfile)).filename == tmpfile
@@ -182,3 +186,9 @@ class TestFile(object):
             out = np.empty_like(arr)
             assert f.read('b', out=out) is out
             np.testing.assert_array_equal(out, arr)
+
+    def test_write_then_read(self, tmpfile):
+        arr = np.arange(6).reshape(2, 3)
+        with File(tmpfile, 'w') as f:
+            f.write_array('a', arr)
+            np.testing.assert_array_equal(f.read('a'), arr)

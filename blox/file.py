@@ -8,8 +8,8 @@ import sys
 import six
 import atexit
 
-from blox.utils import read_i64, write_i64, read_json, write_json
 from blox.blosc import read_blosc, write_blosc
+from blox.utils import read_i64, write_i64, read_json, write_json, restore_dtype
 
 
 """The following signature is a direct descendent of PNG and HDF5 file signatures:
@@ -41,12 +41,16 @@ class File(object):
         filename = getattr(filename, 'strpath', filename)
         filename = os.path.abspath(os.path.expanduser(filename))
         if mode is None:
-            mode = 'r' if os.path.exists(filename) else 'w'
-        elif mode not in 'rw':
-            raise ValueError('invalid mode: {!r}; expected r/w'.format(mode))
+            mode = 'r' if os.path.exists(filename) else 'r+'
+        elif mode == 'w':
+            mode = 'r+'
+        elif mode not in ('r', 'r+'):
+            raise ValueError('invalid mode: {!r}; expected r/r+/w'.format(mode))
         self._mode = mode
+        if self.writable and not os.path.exists(filename):
+            io.open(filename, 'wb').close()
         self._filename = filename
-        self._handle = io.open(filename, mode + 'b')
+        self._handle = io.open(filename, 'r' + (self.writable * '+') + 'b')
         self._index = {}
         self._seek = 0
         self._version = FORMAT_VERSION
@@ -73,7 +77,7 @@ class File(object):
 
     @property
     def writable(self):
-        return self._mode == 'w'
+        return self._mode == 'r+'
 
     @property
     def filesize(self):
