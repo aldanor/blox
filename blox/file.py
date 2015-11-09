@@ -108,6 +108,9 @@ class File(object):
     def __iter__(self):
         return iter(sorted(self._index))
 
+    def __contains__(self, key):
+        return key in self._index
+
     def read(self, key, out=None):
         self._check_handle()
         self._check_key(key)

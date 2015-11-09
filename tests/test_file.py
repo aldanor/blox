@@ -209,3 +209,10 @@ class TestFile(object):
             pytest.raises_regexp(KeyError, 'c', f.shape, 'c')
             pytest.raises_regexp(KeyError, 'c', f.dtype, 'c')
         pytest.raises_regexp(IOError, 'the file handle has been closed', f.info, 'a')
+
+    def test_contains(self, tmpfile):
+        with File(tmpfile, 'w') as f:
+            f.write_json('a', 'b')
+            assert 'a' in f and 'b' not in f
+        with File(tmpfile) as f:
+            assert 'a' in f and 'b' not in f
