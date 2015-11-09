@@ -83,6 +83,28 @@ class File(object):
     def filesize(self):
         return os.stat(self._filename).st_size
 
+    def info(self, key):
+        self._check_handle()
+        self._check_key(key)
+        is_array, offset = self._index[key]
+        self._handle.seek(offset)
+        if is_array:
+            meta = read_json(self._handle)
+            return {
+                'type': 'array',
+                'shape': tuple(meta['shape']),
+                'dtype': restore_dtype(meta['dtype']),
+                'compression': tuple(meta['comp'])
+            }
+        else:
+            return {'type': 'json'}
+
+    def shape(self, key):
+        return self.info(key).get('shape')
+
+    def dtype(self, key):
+        return self.info(key).get('dtype')
+
     def __iter__(self):
         return iter(sorted(self._index))
 

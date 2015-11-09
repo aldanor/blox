@@ -192,3 +192,20 @@ class TestFile(object):
         with File(tmpfile, 'w') as f:
             f.write_array('a', arr)
             np.testing.assert_array_equal(f.read('a'), arr)
+
+    def test_info_shape_dtype(self, tmpfile):
+        with File(tmpfile, 'w') as f:
+            f.write_json('a', 42)
+            f.write_array('b', np.arange(12).reshape(3, 4), compression='lz4', level=5, shuffle=2)
+
+            assert f.info('a') == {'type': 'json'}
+            assert f.info('b') == {'type': 'array', 'shape': (3, 4), 'dtype': np.dtype(int),
+                                   'compression': ('lz4', 5, 2)}
+
+            assert f.shape('a') is None and f.shape('b') == (3, 4)
+            assert f.dtype('a') is None and f.dtype('b') == np.dtype(int)
+
+            pytest.raises_regexp(KeyError, 'c', f.info, 'c')
+            pytest.raises_regexp(KeyError, 'c', f.shape, 'c')
+            pytest.raises_regexp(KeyError, 'c', f.dtype, 'c')
+        pytest.raises_regexp(IOError, 'the file handle has been closed', f.info, 'a')
